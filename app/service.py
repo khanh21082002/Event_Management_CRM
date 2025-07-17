@@ -3,10 +3,21 @@ service.py
 Business logic for user, event, registration, filtering, analytics, and email log operations using DynamoDB.
 """
 
+
+import logging
 from .models import User, Event
 from .schemas import UserFilter, UserCreate, UserOut
 from typing import List, Optional
 import uuid
+
+# Configure logging
+logger = logging.getLogger("event_crm")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+handler.setFormatter(formatter)
+if not logger.hasHandlers():
+    logger.addHandler(handler)
 
 
 def get_user(db, user_id):
@@ -109,7 +120,7 @@ def create_event(db, event):
     event_dict['id'] = event_id
     event_dict['attendees'] = []
     table.put_item(Item=event_dict)
-    # Cập nhật events_hosted cho owner
+    # Update events_hosted for the owner
     user_table = db.Table('users')
     owner_id = event.owner
     user_table.update_item(
@@ -117,7 +128,7 @@ def create_event(db, event):
         UpdateExpression='SET events_hosted = list_append(if_not_exists(events_hosted, :empty), :e)',
         ExpressionAttributeValues={':e': [event_id], ':empty': []}
     )
-    # Cập nhật events_hosted cho các host khác (nếu có)
+    # Update events_hosted for each host
     for host_id in event.hosts:
         user_table.update_item(
             Key={'id': host_id},
@@ -141,13 +152,13 @@ def register_event(db, event_id, user_id):
     """
     event_table = db.Table('events')
     user_table = db.Table('users')
-    # Thêm user vào attendees của event
+    # add user to event's attendees
     event_table.update_item(
         Key={'id': event_id},
         UpdateExpression='SET attendees = list_append(if_not_exists(attendees, :empty), :u)',
         ExpressionAttributeValues={':u': [user_id], ':empty': []}
     )
-    # Thêm event vào events_attended của user
+    # add event to user's events_attended
     user_table.update_item(
         Key={'id': user_id},
         UpdateExpression='SET events_attended = list_append(if_not_exists(events_attended, :empty), :e)',
@@ -248,6 +259,9 @@ def send_emails_to_users(db, filter: UserFilter):
         status = "sent"
         if not send_email(user.email, "Notification from Event CRM", "You have matched a filter query in the Event Management CRM system."):
             status = "failed"
+            logger.error(f"Failed to send email to {user.email}")
+        else:
+            logger.info(f"Email sent to {user.email}")
         log_item = {
             "id": str(uuid.uuid4()),
             "user_id": user.id,
