@@ -1,7 +1,16 @@
+
+"""
+models.py
+Pydantic models for User and Event data structures.
+"""
+
 from pydantic import BaseModel
 from typing import List, Optional
 
 class User(BaseModel):
+    """
+    Data model for a user.
+    """
     id: str
     firstName: str
     lastName: str
@@ -17,6 +26,9 @@ class User(BaseModel):
     events_attended: List[str] = []
 
 class Event(BaseModel):
+    """
+    Data model for an event.
+    """
     id: str
     slug: str
     title: str

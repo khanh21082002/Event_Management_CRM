@@ -1,8 +1,16 @@
+
+"""
+schemas.py
+Pydantic models for request and response validation for users, events, and filters.
+"""
+
 from pydantic import BaseModel
 from typing import List, Optional
 
-# Event schemas
 class EventCreate(BaseModel):
+    """
+    Schema for creating a new event.
+    """
     slug: str
     title: str
     description: Optional[str] = None
@@ -14,6 +22,9 @@ class EventCreate(BaseModel):
     hosts: List[str] = []
 
 class EventOut(BaseModel):
+    """
+    Schema for returning event data.
+    """
     id: str
     slug: str
     title: str
@@ -26,8 +37,10 @@ class EventOut(BaseModel):
     hosts: List[str]
     attendees: List[str] = []
 
-# User schemas
 class UserCreate(BaseModel):
+    """
+    Schema for creating a new user.
+    """
     firstName: str
     lastName: str
     email: str
@@ -40,6 +53,9 @@ class UserCreate(BaseModel):
     state: Optional[str] = None
 
 class UserOut(BaseModel):
+    """
+    Schema for returning user data.
+    """
     id: str
     firstName: str
     lastName: str
@@ -52,6 +68,9 @@ class UserOut(BaseModel):
     events_attended: List[str]
 
 class UserFilter(BaseModel):
+    """
+    Schema for filtering users with various criteria.
+    """
     company: Optional[str]
     job_title: Optional[str]
     city: Optional[str]

@@ -1,3 +1,8 @@
+"""
+service.py
+Business logic for user, event, registration, filtering, analytics, and email log operations using DynamoDB.
+"""
+
 from .models import User, Event
 from .schemas import UserFilter, UserCreate, UserOut
 from typing import List, Optional
@@ -5,6 +10,9 @@ import uuid
 
 
 def get_user(db, user_id):
+    """
+    Retrieve a user by user_id from the users table.
+    """
     table = db.Table('users')
     response = table.get_item(Key={'id': user_id})
     item = response.get('Item')
@@ -15,6 +23,9 @@ def get_user(db, user_id):
     return UserOut(**item)
 
 def update_user(db, user_id, user: UserCreate):
+    """
+    Update a user's information by user_id.
+    """
     table = db.Table('users')
     user_dict = user.dict()
     user_dict['id'] = user_id
@@ -24,11 +35,17 @@ def update_user(db, user_id, user: UserCreate):
     return UserOut(**user_dict)
 
 def delete_user(db, user_id):
+    """
+    Delete a user by user_id.
+    """
     table = db.Table('users')
     table.delete_item(Key={'id': user_id})
     return {"status": "deleted"}
 
 def get_event(db, event_id):
+    """
+    Retrieve an event by event_id from the events table.
+    """
     table = db.Table('events')
     response = table.get_item(Key={'id': event_id})
     item = response.get('Item')
@@ -39,6 +56,9 @@ def get_event(db, event_id):
     return item
 
 def update_event(db, event_id, event):
+    """
+    Update an event's information by event_id.
+    """
     table = db.Table('events')
     event_dict = event.dict()
     event_dict['id'] = event_id
@@ -47,16 +67,25 @@ def update_event(db, event_id, event):
     return event_dict
 
 def delete_event(db, event_id):
+    """
+    Delete an event by event_id.
+    """
     table = db.Table('events')
     table.delete_item(Key={'id': event_id})
     return {"status": "deleted"}
 
 def get_email_logs(db):
+    """
+    Retrieve all email logs from the email_logs table.
+    """
     table = db.Table('email_logs')
     response = table.scan()
     return response.get('Items', [])
 
 def get_all_users(db):
+    """
+    Retrieve all users from the users table.
+    """
     table = db.Table('users')
     response = table.scan()
     items = response.get('Items', [])
@@ -70,6 +99,9 @@ def get_all_users(db):
     return users
 
 def create_event(db, event):
+    """
+    Create a new event and update the events_hosted list for the owner and hosts.
+    """
     import uuid
     table = db.Table('events')
     event_id = str(uuid.uuid4())
@@ -95,12 +127,18 @@ def create_event(db, event):
     return event_dict
 
 def list_events(db):
+    """
+    Retrieve all events from the events table.
+    """
     table = db.Table('events')
     response = table.scan()
     items = response.get('Items', [])
     return items
 
 def register_event(db, event_id, user_id):
+    """
+    Register a user for an event. Adds user to event's attendees and event to user's events_attended.
+    """
     event_table = db.Table('events')
     user_table = db.Table('users')
     # Thêm user vào attendees của event
@@ -118,6 +156,9 @@ def register_event(db, event_id, user_id):
     return {'event_id': event_id, 'user_id': user_id, 'status': 'registered'}
 
 def user_engagement_analytics(db):
+    """
+    Generate analytics for user engagement (number of events hosted/attended).
+    """
     user_table = db.Table('users')
     response = user_table.scan()
     items = response.get('Items', [])
@@ -133,6 +174,9 @@ def user_engagement_analytics(db):
     return result
 
 def create_user(db, user: UserCreate):
+    """
+    Create a new user in the users table.
+    """
     user_id = str(uuid.uuid4())
     user_dict = user.dict()
     user_dict["id"] = user_id
@@ -143,6 +187,9 @@ def create_user(db, user: UserCreate):
     return UserOut(**user_dict)
 
 def filter_users(db, company, job_title, city, state, events_hosted_min, events_hosted_max, events_attended_min, events_attended_max, skip, limit, sort_by):
+    """
+    Filter users by company, job title, city, state, number of events hosted/attended, with sorting and pagination.
+    """
     table = db.Table('users')
     response = table.scan()
     items = response.get('Items', [])
@@ -176,7 +223,13 @@ def filter_users(db, company, job_title, city, state, events_hosted_min, events_
     return [UserOut(**u) for u in users]
 
 def send_emails_to_users(db, filter: UserFilter):
-    # Use filter_users to get the list of users matching the filter
+    """
+    Find users matching the filter and send real emails to them, logging the result.
+    """
+    from app.email_utils import send_email
+    results = []
+    email_log_table = db.Table('email_logs')
+    import time
     users = filter_users(
         db,
         filter.company,
@@ -191,12 +244,10 @@ def send_emails_to_users(db, filter: UserFilter):
         filter.limit,
         filter.sort_by
     )
-    # Mock sending emails & log
-    results = []
-    email_log_table = db.Table('email_logs')
-    import time
     for user in users:
-        status = "sent (mock)"
+        status = "sent"
+        if not send_email(user.email, "Notification from Event CRM", "You have matched a filter query in the Event Management CRM system."):
+            status = "failed"
         log_item = {
             "id": str(uuid.uuid4()),
             "user_id": user.id,

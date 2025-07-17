@@ -1,5 +1,11 @@
 
 
+
+"""
+init_dynamodb.py
+Script to initialize DynamoDB tables for users, events, and email logs.
+"""
+
 import boto3
 import os
 from dotenv import load_dotenv
@@ -17,8 +23,8 @@ dynamodb = boto3.resource(
     aws_secret_access_key='dummy'
 )
 
+# Create users table if it does not exist
 table_name = 'users'
-
 existing_tables = [t.name for t in dynamodb.tables.all()]
 if table_name not in existing_tables:
     table = dynamodb.create_table(
@@ -35,11 +41,11 @@ if table_name not in existing_tables:
         }
     )
     table.wait_until_exists()
-    print("Table created!")
+    print("Users table created!")
 else:
-    print("Table already exists.")
+    print("Users table already exists.")
 
-# Tạo bảng events
+# Create events table if it does not exist
 event_table_name = 'events'
 if event_table_name not in existing_tables:
     event_table = dynamodb.create_table(
@@ -56,11 +62,11 @@ if event_table_name not in existing_tables:
         }
     )
     event_table.wait_until_exists()
-    print("Event table created!")
+    print("Events table created!")
 else:
-    print("Event table already exists.")
+    print("Events table already exists.")
 
-# Tạo bảng email_logs (đặt sau khi đã có existing_tables và dynamodb)
+# Create email_logs table if it does not exist
 email_log_table_name = 'email_logs'
 if email_log_table_name not in [t.name for t in dynamodb.tables.all()]:
     email_log_table = dynamodb.create_table(
@@ -77,6 +83,6 @@ if email_log_table_name not in [t.name for t in dynamodb.tables.all()]:
         }
     )
     email_log_table.wait_until_exists()
-    print("Email log table created!")
+    print("Email logs table created!")
 else:
-    print("Email log table already exists.")
+    print("Email logs table already exists.")

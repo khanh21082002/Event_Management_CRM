@@ -1,0 +1,81 @@
+{
+  "info": {
+    "_postman_id": "event-crm-collection-001",
+    "name": "Event Management CRM API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Users",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/users/all",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["users", "all"]
+        }
+      }
+    },
+    {
+      "name": "Create User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john@example.com\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["users"]
+        }
+      }
+    },
+    {
+      "name": "Filter Users",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/users?company=ABC&job_title=DEV",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["users"],
+          "query": [
+            {"key": "company", "value": "ABC"},
+            {"key": "job_title", "value": "DEV"}
+          ]
+        }
+      }
+    },
+    {
+      "name": "Send Emails",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company\": \"ABC\",\n  \"events_hosted_min\": 1\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/send-emails",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["send-emails"]
+        }
+      }
+    }
+  ]
+}
