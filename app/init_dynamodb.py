@@ -1,3 +1,5 @@
+
+
 import boto3
 import os
 from dotenv import load_dotenv
@@ -57,3 +59,24 @@ if event_table_name not in existing_tables:
     print("Event table created!")
 else:
     print("Event table already exists.")
+
+# Tạo bảng email_logs (đặt sau khi đã có existing_tables và dynamodb)
+email_log_table_name = 'email_logs'
+if email_log_table_name not in [t.name for t in dynamodb.tables.all()]:
+    email_log_table = dynamodb.create_table(
+        TableName=email_log_table_name,
+        KeySchema=[
+            {'AttributeName': 'id', 'KeyType': 'HASH'}
+        ],
+        AttributeDefinitions=[
+            {'AttributeName': 'id', 'AttributeType': 'S'}
+        ],
+        ProvisionedThroughput={
+            'ReadCapacityUnits': 1,
+            'WriteCapacityUnits': 1
+        }
+    )
+    email_log_table.wait_until_exists()
+    print("Email log table created!")
+else:
+    print("Email log table already exists.")

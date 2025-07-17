@@ -56,10 +56,10 @@ class UserFilter(BaseModel):
     job_title: Optional[str]
     city: Optional[str]
     state: Optional[str]
-    events_hosted_min: Optional[int]
-    events_hosted_max: Optional[int]
-    events_attended_min: Optional[int]
-    events_attended_max: Optional[int]
+    events_hosted_min: Optional[int] = None
+    events_hosted_max: Optional[int] = None
+    events_attended_min: Optional[int] = None
+    events_attended_max: Optional[int] = None
     sort_by: Optional[str]
     skip: int = 0
     limit: int = 10

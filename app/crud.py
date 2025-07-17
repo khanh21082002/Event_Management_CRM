@@ -1,9 +1,60 @@
-
-
 from .models import User, Event
 from .schemas import UserFilter, UserCreate, UserOut
 from typing import List, Optional
 import uuid
+
+
+def get_user(db, user_id):
+    table = db.Table('users')
+    response = table.get_item(Key={'id': user_id})
+    item = response.get('Item')
+    if not item:
+        raise Exception('User not found')
+    item['events_hosted'] = item.get('events_hosted', [])
+    item['events_attended'] = item.get('events_attended', [])
+    return UserOut(**item)
+
+def update_user(db, user_id, user: UserCreate):
+    table = db.Table('users')
+    user_dict = user.dict()
+    user_dict['id'] = user_id
+    user_dict['events_hosted'] = []
+    user_dict['events_attended'] = []
+    table.put_item(Item=user_dict)
+    return UserOut(**user_dict)
+
+def delete_user(db, user_id):
+    table = db.Table('users')
+    table.delete_item(Key={'id': user_id})
+    return {"status": "deleted"}
+
+def get_event(db, event_id):
+    table = db.Table('events')
+    response = table.get_item(Key={'id': event_id})
+    item = response.get('Item')
+    if not item:
+        raise Exception('Event not found')
+    item['hosts'] = item.get('hosts', [])
+    item['attendees'] = item.get('attendees', [])
+    return item
+
+def update_event(db, event_id, event):
+    table = db.Table('events')
+    event_dict = event.dict()
+    event_dict['id'] = event_id
+    event_dict['attendees'] = []
+    table.put_item(Item=event_dict)
+    return event_dict
+
+def delete_event(db, event_id):
+    table = db.Table('events')
+    table.delete_item(Key={'id': event_id})
+    return {"status": "deleted"}
+
+def get_email_logs(db):
+    table = db.Table('email_logs')
+    response = table.scan()
+    return response.get('Items', [])
 
 def get_all_users(db):
     table = db.Table('users')
@@ -140,13 +191,23 @@ def send_emails_to_users(db, filter: UserFilter):
         filter.limit,
         filter.sort_by
     )
-    # Mock sending emails
+    # Mock sending emails & log
     results = []
+    email_log_table = db.Table('email_logs')
+    import time
     for user in users:
-        # Here you would call your email sending utility
+        status = "sent (mock)"
+        log_item = {
+            "id": str(uuid.uuid4()),
+            "user_id": user.id,
+            "email": user.email,
+            "status": status,
+            "timestamp": int(time.time())
+        }
+        email_log_table.put_item(Item=log_item)
         results.append({
             "user_id": user.id,
             "email": user.email,
-            "status": "sent (mock)"
+            "status": status
         })
     return {"results": results, "count": len(results)}
