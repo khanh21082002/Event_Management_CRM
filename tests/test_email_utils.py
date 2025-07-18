@@ -14,3 +14,6 @@ def test_send_email_real():
     body = "This is a test email sent from the Event Management CRM project."
     result = send_email(to_email, subject, body)
     assert result is True
+
+    
+

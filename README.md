@@ -90,6 +90,19 @@ curl -X POST "http://localhost:8000/users" \
   }'
 ```
 
+#### Create an event
+```sh
+curl -X POST "http://localhost:8000/events" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "slug": "unit-test-event",
+      "title": "Unit Test Event",
+      "startAt": "2025-17-07T10:00:00Z",
+      "endAt": "2023-17-07T12:00:00Z",
+      "maxCapacity": 100,
+      "owner": "unit_test_owner"
+```
+
 #### Filter users
 ```sh
 curl -X GET "http://localhost:8000/users?company=ABC&job_title=DEV"
@@ -111,7 +124,7 @@ curl -X POST "http://localhost:8000/send-emails" \
 - `app/schemas.py`: Pydantic schemas
 - `app/database.py`: DynamoDB connection
 - `app/init_dynamodb.py`: Table creation script
-- `app/dependencies.py`: FastAPI dependencies
+- `app/dependencies.py`: FastAPI dependencies (Database sessions) 
 
 ## Notes
 - Email sending is mocked, not real.
