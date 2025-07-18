@@ -118,6 +118,11 @@ curl -X POST "http://localhost:8000/send-emails" \
   }'
 ```
 
+#### Analytics
+ ```sh
+   curl -X GET "http://localhost:8000/analytics/user-engagement"
+```
+
 ## Project Structure
 - `app/main.py`: API definitions
 - `app/crud.py`: Business/data logic
