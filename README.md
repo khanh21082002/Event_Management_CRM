@@ -22,7 +22,7 @@ Event Management CRM system built with FastAPI and DynamoDB. Supports user and e
 
 ## API
 ![User](https://github.com/khanh21082002/Event_Management_CRM/blob/main/img/api.png)
-![Event and Email](https://github.com/khanh21082002/Event_Management_CRM/blob/main/img/1.png)
+![Event and Email](https://github.com/khanh21082002/Event_Management_CRM/blob/main/img/api1.png)
 
 ## Setup
 1. Clone the repository:
