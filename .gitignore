@@ -1,0 +1,13 @@
+# File: event_crm/.gitignore
+
+# Ignore node_modules
+node_modules/
+
+# Ignore file environment variables
+.env
+.env.local
+
+# Ignore file __pycache__
+__pycache__/
+
+
